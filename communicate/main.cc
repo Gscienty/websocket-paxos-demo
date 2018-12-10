@@ -35,6 +35,7 @@ void websocket_frame_handle(rwg_websocket::endpoint &endpoint, std::function<voi
     for (auto& other_endpoint : server.websocket().endpoints()) {
         if (endpoint.fd() != other_endpoint.first) {
             auto frame = other_endpoint.second->response();
+            frame.fin_flag() = true;
             frame.opcode() = endpoint.frame().opcode();
             frame.payload() = payload;
             frame.write();
