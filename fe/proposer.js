@@ -45,7 +45,11 @@ function proposer_send_proposal(ws) {
 }
 
 function proposer_send_learner(ws) {
-
+    var msg = {
+        type: 'learn',
+        value: proposer_state.value
+    };
+    ws.send(JSON.stringify(msg));
 }
 
 function proposer_receive_message(ws, msg) {
@@ -72,6 +76,10 @@ function proposer_receive_message(ws, msg) {
         }
     }
     else if (msg.type === 'reject') {
+        // reject msg = {
+        //  type: 'reject',
+        //  max_id: <number>
+        // }
         proposer_restart_prepare(msg.max_id + 1);
     }
     // accept msg = {
