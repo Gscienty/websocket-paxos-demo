@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <button onclick="set_role()">set role</button>
+        <button onclick="send_start()">send start</button>
+        <div id="log"></div>
+        <script src="/static/proposer.js"></script>
+        <script src="/static/acceptor.js"></script>
+        <script>
+            function log(log_msg) {
+                var log_div = document.getElementById('log');
+                var p = document.createElement('p');
+                p.innerText = (new Date()).toUTCString() + ': ' + log_msg;
+                log_div.appendChild(p);
+            }
+
+            var paxos_roles = [ 'proposer', 'acceptor', 'learner' ];
+            var role = 'visitor';
+            var role_index = 0;
+            var ws = new WebSocket("ws://localhost:5000/paxos");
+
+            function set_role() {
+                role = paxos_roles[role_index];
+                role_index = (role_index + 1) % 3;
+
+                log('role: ' + role);
+            }
+
+            function start() {
+                if (role === 'proposer') {
+                    setTimeout(function() {
+                        log('proposer value: ' + proposer_state.value);
+                        proposer_send_prepare(ws);
+                    }, 1000);
+                }
+                else if (role === 'acceptor') {
+                    ws.send(JSON.stringify({ type: 'acceptor_hello' }));
+                }
+            }
+
+            function send_start() {
+                ws.send(JSON.stringify({ type: 'start' }));
+                start();
+            }
+
+            ws.onmessage = function (evt) {
+                var msg = JSON.parse(evt.data);
+
+                if (role === 'proposer') {
+                    if (msg.type === 'start') {
+                        log('proposer start');
+                        start();
+                    }
+                    else {
+                        proposer_receive_message(ws, msg);
+                    }
+                }
+                else if (role === 'acceptor') {
+                    if (msg.type === 'start') {
+                        log('acceptor say hello');
+                        start();
+                    }
+                    else {
+                        acceptor_receive_message(ws, msg);
+                    }
+                }
+                else if (role === 'learner') {
+                    if (msg.type === 'learn')  {
+                        log('learn value' + msg.value);
+                    }
+                }
+            };
+        </script>
+    </body>
+</html>

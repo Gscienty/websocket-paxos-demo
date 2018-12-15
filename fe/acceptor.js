@@ -29,21 +29,29 @@ function acceptor_send_accept(ws) {
 
 function acceptor_receive_message(ws, msg) {
     if (msg.type === 'prepare') {
+
+        log('[prepare] msg id: ' + msg.id + '; state id:' + acceptor_state.max_id);
+
         if (msg.id <= acceptor_state.max_id) {
             acceptor_send_reject(ws);
-            log('prepare reject');
+            log('reject prepare');
         }
         else {
             acceptor_state.max_id = msg.id;
             acceptor_send_promise(ws);
-            log('promise');
+            log('promise prepare');
         }
     }
     else if (msg.type === 'proposal') {
+
+        log('[proposal] msg id: ' + msg.id + '; state id:' + acceptor_state.max_id);
+
         if (msg.id < acceptor_state.max_id) {
             acceptor_send_reject(ws);
+            log('reject proposal');
         }
         else {
+            log('accept proposal');
             acceptor_state.max_id = msg.id;
             acceptor_state.value = msg.value;
             acceptor_send_accept(ws);
