@@ -22,8 +22,9 @@ function proposer_restart_prepare(prepare) {
 function proposer_send_prepare(ws) {
     var msg = {
         type: 'prepare',
-        id: proposer_state.prepare_id;
+        id: proposer_state.prepare_id
     };
+    log('send :' + JSON.stringify(msg));
     ws.send(JSON.stringify(msg));
     
     proposer_state.prepare_timeout_handler = setTimeout(function () {
@@ -37,6 +38,7 @@ function proposer_send_proposal(ws) {
         id: proposer_state.prepare_id,
         value: proposer_state.value
     };
+    log('send :' + JSON.stringify(msg));
     ws.send(JSON.stringify(msg));
 
     proposer_state.prepare_timeout_handler = setTimeout(function () {
@@ -49,6 +51,7 @@ function proposer_send_learner(ws) {
         type: 'learn',
         value: proposer_state.value
     };
+    log('send :' + JSON.stringify(msg));
     ws.send(JSON.stringify(msg));
 }
 

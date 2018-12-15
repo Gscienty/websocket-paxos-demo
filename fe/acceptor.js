@@ -31,10 +31,12 @@ function acceptor_receive_message(ws, msg) {
     if (msg.type === 'prepare') {
         if (msg.id <= acceptor_state.max_id) {
             acceptor_send_reject(ws);
+            log('prepare reject');
         }
         else {
             acceptor_state.max_id = msg.id;
             acceptor_send_promise(ws);
+            log('promise');
         }
     }
     else if (msg.type === 'proposal') {
